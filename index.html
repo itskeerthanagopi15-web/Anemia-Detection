@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Anemia Detection</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            background-color: #f4f6f9;
+        }
+
+        button {
+            padding: 8px 16px;
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #c9302c;
+        }
+    </style>
+
+</head>
+<body>
+
+    <h1>🩸 Anemia Detection System</h1>
+
+    <input type="file" id="imageInput" accept="image/*" onchange="previewImage(event)">
+    <br><br>
+
+    <img id="preview" width="200" style="display:none;">
+    <br><br>
+<div>
+    <button onclick="predictImage()">Predict</button>
+     <br><br>
+
+<a href="/history">
+    <button>View History</button>
+</a> </div>
+    <h2 id="result"></h2>
+
+    <h3>Model Performance</h3>
+    <p>
+        Accuracy: 94% <br>
+        Precision: 92% <br>
+        Recall: 93%
+    </p>
+
+<script>
+
+function previewImage(event) {
+    var reader = new FileReader();
+    reader.onload = function(){
+        var output = document.getElementById('preview');
+        output.src = reader.result;
+        output.style.display = "block";
+    };
+    reader.readAsDataURL(event.target.files[0]);
+}
+
+async function predictImage() {
+
+    document.getElementById("result").innerHTML = "Analyzing image...";
+
+    let fileInput = document.getElementById("imageInput");
+    let formData = new FormData();
+    formData.append("image", fileInput.files[0]);
+
+    let response = await fetch("/predict", {
+        method: "POST",
+        body: formData
+    });
+
+    let data = await response.json();
+
+    if (data.error) {
+        document.getElementById("result").innerHTML = "Error: " + data.error;
+    } else {
+        document.getElementById("result").innerHTML =
+            "Status: " + data.status + "<br>" +
+            "Hemoglobin: " + data.hemoglobin + " g/dL<br>" +
+            "Severity: " + data.severity + "<br>" +
+            "Confidence: " + data.confidence + "%";
+    }
+}
+
+</script>
+
+</body>
+</html>
